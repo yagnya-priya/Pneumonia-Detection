@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pneumonia Detection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      background-color: #dce6f5; /* Very light blue background */
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #000; /* Black border */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333; /* Darken the heading color */
+    }
+
+    #patient-form {
+      margin-bottom: 20px;
+    }
+
+    #patient-form label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    #patient-form input[type="text"],
+    #patient-form input[type="number"],
+    #patient-form select,
+    #patient-form input[type="tel"] {
+      width: calc(100% - 20px); /* Adjust width to accommodate padding */
+      padding: 10px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc; /* Add a border */
+      border-radius: 4px; /* Add border radius */
+      font-size: 16px; /* Increase font size */
+    }
+
+    #patient-form select {
+      appearance: none; /* Remove default arrow */
+      background-image: url('data:image/svg+xml;utf8,<svg fill="#333" width="12" height="12" xmlns="http://www.w3.org/2000/svg"><polygon points="0,0 12,0 6,12" /></svg>');
+      background-repeat: no-repeat;
+      background-position: calc(100% - 10px) center;
+      padding-right: 30px; /* Add space for arrow */
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    .upload-btn {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-size: 16px; /* Increase font size */
+    }
+
+    .upload-btn:hover {
+      background-color: #45a049;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto 20px;
+      font-size: 16px; /* Increase font size */
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    /* Styling for the result label */
+    #result-label {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: #fce4ec; /* Light pink background */
+      border-radius: 8px;
+      border: 2px solid #000; /* Black border */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Increase font size for result */
+    #result-label pre {
+      font-size: 20px;
+      white-space: pre-wrap; /* Allow the advice to wrap to the next line */
+      margin: 0; /* Remove default margin */
+    }
+
+    #preview-image {
+      max-width: 800px;
+      display: block;
+      margin: 0 auto 20px;
+      border: 2px solid #333; /* Add border */
+      border-radius: 4px;
+    }
+    #star{
+      color:red;
+    }
+    #imagelabel{
+      display:flex;
+      flex-direction: column;
+      align-items: left;
+      justify-content: center;
+      margin-right:630px;
+      
+    }
+    #uploadlabel{
+      margin-bottom:5px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pneumonia Detection</h1>
+    <!-- Patient Details Section -->
+    <form id="patient-form">
+      <label for="name">Name <span id="star">*</span></label>
+      <input type="text" id="name" placeholder="Enter your name" required>
+      <label for="age">Age <span id="star">*</span></label>
+      <input type="number" id="age" placeholder="Enter your age">
+      <label for="gender">Gender <span id="star">*</span></label>
+      <select id="gender">
+        <option value="">Select gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <label for="phone">Phone Number <span id="star">*</span></label>
+      <input type="tel" id="phone" placeholder="Enter your phone number">
+    </form>
+    <!-- Image Upload Section -->
+    <input type="file" id="file-input" accept="image/*" required>
+    <div id="imagelabel">
+    <label for="image" id="uploadlabel"><b>Upload your image</b> <span id="star">*</span></label>
+    <label for="file-input" class="upload-btn">Choose Image</label>
+    </div>
+    <img id="preview-image" src="#" alt="Preview Image" style="display: none;">
+    <!-- Evaluate Button -->
+    <button id="evaluate-btn">Evaluate</button>
+    <!-- Result Display Area -->
+    <div id="result-label"></div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const previewImage = document.getElementById('preview-image');
+    const evaluateBtn = document.getElementById('evaluate-btn');
+    const resultLabel = document.getElementById('result-label');
+
+    fileInput.addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImage.src = e.target.result;
+          previewImage.style.display = 'block';
+          evaluateBtn.style.display = 'block';  // Show the evaluate button when an image is selected
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    evaluateBtn.addEventListener('click', function() {
+      const name = document.getElementById('name').value;
+      const age = document.getElementById('age').value;
+      const gender = document.getElementById('gender').value;
+      const phone = document.getElementById('phone').value;
+
+      if (name.trim() === '' || age.trim() === '' || gender.trim() === '' || phone.trim() === '') {
+        alert('Please fill in all the patient details.');
+        return;
+      }
+
+      const fileInput = document.getElementById('file-input');
+      if (!fileInput.files || !fileInput.files[0]) {
+        alert('Please select an image.');
+        return;
+      }
+
+      // Proceed with evaluation
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      formData.append('name', name);
+      formData.append('age', age);
+      formData.append('gender', gender);
+      formData.append('phone', phone);
+
+      fetch('/evaluate', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        resultLabel.innerHTML = '<pre>' + 
+                                'Prediction  :  ' + data.result + '\n' + 
+                                'Probability :  ' + data.probability + '\n' + 
+                                'Advice      :  ' + addWhiteSpace(data.advice) + 
+                                '</pre>';
+        resultLabel.style.display = 'block'; // Show the result label
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+
+    // Function to add whitespace before the advice text on the second line
+    function addWhiteSpace(advice) {
+      const words = advice.split(' ');
+      const maxWidth = 50; // Adjust according to container width
+      let firstLine = '   ';
+      let secondLine = '  ';
+      let currentWidth = 0;
+      for (let i = 0; i < words.length; i++) {
+        if (currentWidth + words[i].length <= maxWidth) {
+          firstLine += words[i] + ' ';
+          currentWidth += words[i].length + 1;
+        } else {
+          secondLine = words.slice(i).join(' ');
+          break;
+        }
+      }
+      return firstLine.trim() + '  '+ '\n   ' + ' '.repeat(12) + secondLine.trim();
+    }
+  </script>
+</body>
+</html>
